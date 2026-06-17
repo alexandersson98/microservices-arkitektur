@@ -1,0 +1,15 @@
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Maven (backend)
+backend/target/
+
+# Node (frontend)
+frontend/node_modules/
+frontend/dist/
+
+# Övrigt
+*.log
+.DS_Store
