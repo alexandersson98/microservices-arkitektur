@@ -4,7 +4,6 @@ import com.example.boilerroom_labb1.dto.author.AuthorResponseDTO;
 import com.example.boilerroom_labb1.dto.book.v1.BookResponseDTO;
 import com.example.boilerroom_labb1.dto.loan.LoanHistoryResponseDTO;
 import com.example.boilerroom_labb1.dto.loan.LoanResponseDTO;
-import com.example.boilerroom_labb1.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
