@@ -1,0 +1,27 @@
+services:
+  vault:
+    image: hashicorp/vault:1.18
+    container_name: vault
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: godis
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+
+  postgres:
+    image: postgres:16
+    container_name: library-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: librarydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
