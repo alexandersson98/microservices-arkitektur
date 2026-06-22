@@ -25,9 +25,10 @@ public class JwtUtil {
 
 
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String role) {
         return Jwts.builder()
                 .subject(username)
+                .claim("role", role)        // rollen sparas i token
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
@@ -42,6 +43,16 @@ public class JwtUtil {
                 .getPayload()
                 .getSubject();
     }
+
+    public String extractRole(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", String.class);
+    }
+
 
     public boolean validateToken(String token){
         try {
