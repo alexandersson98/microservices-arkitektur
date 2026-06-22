@@ -34,19 +34,17 @@ public class LoanService {
     private final LoanMapper loanMapper;
     private final LoanHistoryRepository loanHistory;
     private final LoanHistoryMapper loanHistoryMapper;
-    private final MemberRepository memberRepository;
 
 
 
     public LoanService(LoanRepository loanRepository,
                        BookRepository bookRepository,
-                       LoanMapper loanMapper, LoanHistoryRepository loanHistory, LoanHistoryMapper loanHistoryMapper, MemberRepository memberRepository) {
+                       LoanMapper loanMapper, LoanHistoryRepository loanHistory, LoanHistoryMapper loanHistoryMapper) {
         this.loanRepository = loanRepository;
         this.bookRepository = bookRepository;
         this.loanMapper = loanMapper;
         this.loanHistory = loanHistory;
         this.loanHistoryMapper = loanHistoryMapper;
-        this.memberRepository = memberRepository;
     }
     @Caching(evict = {
             @CacheEvict(value = "loan", allEntries = true),
@@ -54,8 +52,8 @@ public class LoanService {
     })
     @Transactional
     public LoanResponseDTO createLoan(LoanRequestDTO request){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member =  memberRepository.findByEmailOrPhone(username).orElseThrow();
+        Long memberId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
         Book book = bookRepository.findByIdWithLock(request.bookId())
                 .orElseThrow(() -> new NotFoundException("Book not found"));
         if (loanRepository.existsByBookId(book.getId())) {
@@ -67,7 +65,7 @@ public class LoanService {
         Loan loan = new Loan();
         loan.setBook(book);
         loan.setLoanDate(LocalDate.now());
-        loan.setMember(member);
+        loan.setMemberId(memberId);
 
         Loan savedLoan = loanRepository.saveAndFlush(loan);
 

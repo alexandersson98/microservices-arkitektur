@@ -11,22 +11,16 @@ import java.time.LocalDate;
 @Component
 public class LoanHistoryMapper {
 
-    private final MemberMapper memberMapper;
-
-    public LoanHistoryMapper(MemberMapper memberMapper) {
-        this.memberMapper = memberMapper;
-    }
-
-
     public LoanHistory toEntity(Loan loan) {
         LoanHistory history = new LoanHistory();
         history.setId(loan.getId());
         history.setBook(loan.getBook());
         history.setLoanDate(loan.getLoanDate());
         history.setReturnDate(LocalDate.now());
-        history.setMember(loan.getMember());
+        history.setMemberId(loan.getMemberId());
         return history;
     }
+
     public LoanHistoryResponseDTO toResponseDto(LoanHistory history) {
         return new LoanHistoryResponseDTO(
                 history.getId(),
@@ -34,7 +28,7 @@ public class LoanHistoryMapper {
                 history.getLoanDate(),
                 history.getReturnDate(),
                 "Book has been returned",
-                memberMapper.toLoanResponse(history.getMember())
+                history.getMemberId()
         );
     }
 }

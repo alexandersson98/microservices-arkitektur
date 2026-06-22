@@ -14,9 +14,8 @@ public class Loan {
     @OneToOne
     @JoinColumn(name = "book_id", unique = true, nullable = false)
     private Book book;
-    @ManyToOne
-    @JoinColumn(name = "memberId")
-    private Member member;
+
+    private Long memberId;
 
 
     private LocalDate loanDate;
@@ -45,11 +44,11 @@ public class Loan {
         this.loanDate = loanDate;
     }
 
-    public void setMember(Member member) {
-        this.member = member;
+    public Long getMemberId() {
+        return memberId;
     }
 
-    public Member getMember() {
-        return member;
+    public void setMemberId(Long memberId) {
+        this.memberId = memberId;
     }
 }

@@ -1,7 +1,5 @@
 package org.example.library_service.entity;
 
-import com.example.boilerroom_labb1.entity.Book;
-import com.example.boilerroom_labb1.entity.member.Member;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -14,9 +12,8 @@ import java.time.LocalDate;
         @ManyToOne
         @JoinColumn(name = "book_id", nullable = false)
         private Book book;
-        @ManyToOne
-        @JoinColumn(name = "memberId")
-        private Member member;
+
+        private Long memberId;
 
 
         private LocalDate loanDate;
@@ -57,12 +54,12 @@ import java.time.LocalDate;
             this.returnDate = returnDate;
         }
 
-        public Member getMember() {
-            return member;
+        public Long getMemberId() {
+            return memberId;
         }
 
-        public void setMember(Member member) {
-            this.member = member;
+        public void setMemberId(Long memberId) {
+            this.memberId = memberId;
         }
     }
 
