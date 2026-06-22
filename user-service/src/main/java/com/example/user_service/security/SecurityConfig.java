@@ -57,7 +57,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")));
         RateLimitingFilter rateLimitingFilter = new RateLimitingFilter();
-        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtil, userDetailsService);
+        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtil);
         http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
