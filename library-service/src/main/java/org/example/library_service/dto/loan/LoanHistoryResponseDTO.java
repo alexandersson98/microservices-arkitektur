@@ -22,5 +22,5 @@ public record LoanHistoryResponseDTO(
         @Schema(description = "Status message", example = "Book has been returned")
         String message,
 
-        MemberLoanResponseDTO member
+        Long memberId
 ) implements Serializable {}

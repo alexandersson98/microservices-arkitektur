@@ -7,11 +7,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LoanMapper {
-    private final MemberMapper memberMapper;
-
-    public LoanMapper(MemberMapper memberMapper) {
-        this.memberMapper = memberMapper;
-    }
 
     public LoanResponseDTO toResponseDto(Loan loan) {
         return new LoanResponseDTO(
@@ -19,8 +14,7 @@ public class LoanMapper {
                 loan.getBook().getId(),
                 loan.getBook().getTitle(),
                 loan.getLoanDate(),
-                memberMapper.toLoanResponse(loan.getMember()
-
-        ));
+                loan.getMemberId()
+        );
     }
 }
