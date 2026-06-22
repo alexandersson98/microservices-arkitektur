@@ -355,4 +355,88 @@ class UserServiceApplicationTests {
                         .content(memberRequest))
                 .andExpect(status().isBadRequest());
     }
+
+    // ===== EXCEPTION HANDLER - fler scenarion =====
+
+    @Test
+    void loginWithEmptyBodyShouldReturn400OrUnauthorized() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void createMemberWithMissingPhoneShouldReturn400() throws Exception {
+        String memberRequest = """
+            {
+                "name": "No Phone",
+                "personId": "20000101-1234",
+                "email": "nophone@test.com",
+                "password": "password123"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/member")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(memberRequest))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createMemberWithMissingPersonIdShouldReturn400() throws Exception {
+        String memberRequest = """
+            {
+                "name": "No PersonId",
+                "phone": "0711112222",
+                "email": "nopersonid@test.com",
+                "password": "password123"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/member")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(memberRequest))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createMemberWithBlankNameShouldReturn400() throws Exception {
+        String memberRequest = """
+            {
+                "name": "",
+                "phone": "0711112222",
+                "personId": "20000101-1234",
+                "email": "blankname@test.com",
+                "password": "password123"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/member")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(memberRequest))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createMemberResponseShouldContainCorrectFields() throws Exception {
+        String memberRequest = """
+            {
+                "name": "Field Test User",
+                "phone": "0755555555",
+                "personId": "20010101-1234",
+                "email": "fieldtest@test.com",
+                "password": "password123"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/member")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(memberRequest))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Field Test User"))
+                .andExpect(jsonPath("$.phone").value("0755555555"))
+                .andExpect(jsonPath("$.personId").value("20010101-1234"))
+                .andExpect(jsonPath("$.email").value("fieldtest@test.com"));
+    }
 }
