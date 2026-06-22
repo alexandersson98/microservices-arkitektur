@@ -33,7 +33,7 @@ public class AuthService {
         Member member = memberRepository.findByEmailOrPhone(loginRequest.username())
                 .orElseThrow();
 
-        return new LoginResponseDTO(jwtUtil.generateToken(loginRequest.username()), member.getRole());
+        return new LoginResponseDTO(jwtUtil.generateToken(loginRequest.username(), member.getRole().name()), member.getRole());
 
     }
 }
