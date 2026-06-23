@@ -134,11 +134,11 @@ class ExceptionTest {
         expirationField.setAccessible(true);
         expirationField.set(jwtUtil, 86400000L);
 
-        String token = jwtUtil.generateToken("test@test.com", "USER");
+        String token = jwtUtil.generateToken(1L, "USER");
 
         assertTrue(jwtUtil.validateToken(token));
-        assertEquals("test@test.com", jwtUtil.extractUsername(token));
-        assertEquals("USER", jwtUtil.extractRole(token));
+        assertEquals(1L, jwtUtil.extractMemberId(token));
+        assertEquals(java.util.List.of("USER"), jwtUtil.extractRoles(token));
     }
 
     @Test
@@ -186,13 +186,7 @@ class ExceptionTest {
         expirationField.set(jwtUtil, 86400000L);
 
         com.example.user_service.security.JwtAuthenticationFilter filter =
-                new com.example.user_service.security.JwtAuthenticationFilter(jwtUtil, username -> {
-                    Member member = new Member();
-                    member.setEmail(username);
-                    member.setPassword("password");
-                    member.setRole(Role.USER);
-                    return new CustomUserDetails(member);
-                });
+                new com.example.user_service.security.JwtAuthenticationFilter(jwtUtil);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -214,17 +208,11 @@ class ExceptionTest {
         expirationField.set(jwtUtil, 86400000L);
 
         // Generera en riktig token och gör den ogiltig genom att ändra sista tecknet
-        String validToken = jwtUtil.generateToken("test@test.com", "USER");
+        String validToken = jwtUtil.generateToken(1L, "USER");
         String tamperedToken = validToken.substring(0, validToken.length() - 1) + "X";
 
         com.example.user_service.security.JwtAuthenticationFilter filter =
-                new com.example.user_service.security.JwtAuthenticationFilter(jwtUtil, username -> {
-                    Member member = new Member();
-                    member.setEmail(username);
-                    member.setPassword("password");
-                    member.setRole(Role.USER);
-                    return new CustomUserDetails(member);
-                });
+                new com.example.user_service.security.JwtAuthenticationFilter(jwtUtil);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer " + tamperedToken);
