@@ -145,7 +145,7 @@ export async function mountHandleBook() {
   document.getElementById('form-get-book-metadata')?.addEventListener('submit', async  e => {
     e.preventDefault()
     const { id, } = Object.fromEntries(new FormData(e.target))
-    const { ok, data } = await api ('GET',`http://localhost:8081/api/v1/books/${id}/metadata`)
+    const { ok, data } = await api ('GET',`/api/v1/books/${id}/metadata`)
   showResult('result-get-metadata', ok, data)
   })
 }
