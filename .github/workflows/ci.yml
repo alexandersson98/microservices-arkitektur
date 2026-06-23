@@ -1,0 +1,37 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch code
+        uses: actions/checkout@v3
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build and run tests (user-service)
+        run: mvn verify
+        working-directory: user-service
+
+      - name: Build and run tests (library-service)
+        run: mvn verify
+        working-directory: library-service
+
+      - name: Build and run tests (api-gateway)
+        run: mvn verify
+        working-directory: api-gateway
+
+      - name: Build and run tests (eureka-server)
+        run: mvn verify
+        working-directory: eureka-server
