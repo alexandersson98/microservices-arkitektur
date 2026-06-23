@@ -1,6 +1,7 @@
 package org.example.library_service.dto.loan;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.example.library_service.dto.member.MemberLoanResponseDTO;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -10,4 +11,5 @@ public record LoanResponseDTO(@Schema(description = "Unique identifier of the bo
                               @Schema(description = "Title of the book", example = "Hunger Games")
                               String bookTitle,
                               LocalDate loanDate,
-                              Long memberId) implements Serializable {}
+                              Long memberId,
+                              String memberName) implements Serializable {}

@@ -14,6 +14,7 @@ import java.time.LocalDate;
         private Book book;
 
         private Long memberId;
+        private String memberName;
 
 
         private LocalDate loanDate;
@@ -60,6 +61,14 @@ import java.time.LocalDate;
 
         public void setMemberId(Long memberId) {
             this.memberId = memberId;
+        }
+
+        public String getMemberName() {
+            return memberName;
+        }
+
+        public void setMemberName(String memberName) {
+            this.memberName = memberName;
         }
     }
 
