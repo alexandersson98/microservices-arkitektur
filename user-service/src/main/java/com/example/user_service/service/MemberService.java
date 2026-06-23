@@ -1,5 +1,6 @@
 package com.example.user_service.service;
 
+import com.example.user_service.dto.member.MemberLoanResponseDTO;
 import com.example.user_service.dto.member.MemberRequestDTO;
 import com.example.user_service.dto.member.MemberResponseDTO;
 import com.example.user_service.entity.member.Member;
@@ -34,5 +35,10 @@ public class MemberService {
         Member member = memberMapper.toMemberEntity(memberRequestDto, Role.LIBRARIAN);
         memberRepository.save(member);
         return memberMapper.toResponse(member);
+    }
+
+    public MemberLoanResponseDTO getMember(Long id){
+        Member member = memberRepository.findById(id).orElseThrow();
+        return memberMapper.toLoanResponse(member);
     }
 }

@@ -28,7 +28,9 @@ public class LoanHistoryMapper {
                 history.getLoanDate(),
                 history.getReturnDate(),
                 "Book has been returned",
-                history.getMemberId()
+                history.getMemberId(),
+                history.getMemberName()
+
         );
     }
 }

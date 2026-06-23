@@ -12,4 +12,5 @@ frontend/dist/
 
 # Övrigt
 *.log
-.DS_Store
+.DS_Storetarget/
+target/
