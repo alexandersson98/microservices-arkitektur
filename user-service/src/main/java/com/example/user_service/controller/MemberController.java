@@ -1,6 +1,7 @@
 package com.example.user_service.controller;
 
 
+import com.example.user_service.dto.member.MemberLoanResponseDTO;
 import com.example.user_service.dto.member.MemberRequestDTO;
 import com.example.user_service.dto.member.MemberResponseDTO;
 import com.example.user_service.openapi.BadRequestResponse;
@@ -59,5 +60,13 @@ public class MemberController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @Operation(summary = "Get member for loan", description = "Returns member info used by library-service")
+    @GetMapping("{id}")
+    public ResponseEntity<MemberLoanResponseDTO>getMember(@PathVariable Long id){
+        MemberLoanResponseDTO response = memberService.getMember(id);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
     }
 }

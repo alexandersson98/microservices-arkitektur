@@ -1,9 +1,12 @@
 package org.example.library_service.service;
 
 import jakarta.transaction.Transactional;
+import org.apache.catalina.User;
+import org.example.library_service.client.UserClient;
 import org.example.library_service.dto.loan.LoanHistoryResponseDTO;
 import org.example.library_service.dto.loan.LoanRequestDTO;
 import org.example.library_service.dto.loan.LoanResponseDTO;
+import org.example.library_service.dto.member.MemberLoanResponseDTO;
 import org.example.library_service.entity.Book;
 import org.example.library_service.entity.Loan;
 import org.example.library_service.entity.LoanHistory;
@@ -34,17 +37,28 @@ public class LoanService {
     private final LoanMapper loanMapper;
     private final LoanHistoryRepository loanHistory;
     private final LoanHistoryMapper loanHistoryMapper;
+    private final UserClient userClient;
+
 
 
 
     public LoanService(LoanRepository loanRepository,
                        BookRepository bookRepository,
-                       LoanMapper loanMapper, LoanHistoryRepository loanHistory, LoanHistoryMapper loanHistoryMapper) {
+                       LoanMapper loanMapper, LoanHistoryRepository loanHistory, LoanHistoryMapper loanHistoryMapper, UserClient userClient) {
         this.loanRepository = loanRepository;
         this.bookRepository = bookRepository;
         this.loanMapper = loanMapper;
         this.loanHistory = loanHistory;
         this.loanHistoryMapper = loanHistoryMapper;
+        this.userClient = userClient;
+    }
+
+    private Long currentMemberId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof Long memberId)) {
+            throw new ValidationException("No authenticated member");
+        }
+        return memberId;
     }
     @Caching(evict = {
             @CacheEvict(value = "loan", allEntries = true),
@@ -52,8 +66,8 @@ public class LoanService {
     })
     @Transactional
     public LoanResponseDTO createLoan(LoanRequestDTO request){
-        Long memberId = (Long) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
+        Long memberId = currentMemberId();
+        MemberLoanResponseDTO member = userClient.getMember(memberId);
         Book book = bookRepository.findByIdWithLock(request.bookId())
                 .orElseThrow(() -> new NotFoundException("Book not found"));
         if (loanRepository.existsByBookId(book.getId())) {
@@ -69,7 +83,7 @@ public class LoanService {
 
         Loan savedLoan = loanRepository.saveAndFlush(loan);
 
-        return loanMapper.toResponseDto(savedLoan);
+        return loanMapper.toResponseDto(savedLoan, member);
     } catch (DataIntegrityViolationException e){
         throw new BookAlreadyLoanedException("Book already loaned");}
     }
@@ -77,8 +91,7 @@ public class LoanService {
     @Cacheable("loan")
     public Page<LoanResponseDTO> getAllActiveLoans(Pageable pageable){
            return loanRepository.findAll(pageable)
-                .map(loanMapper::toResponseDto);
-
+                   .map(loan -> loanMapper.toResponseDto(loan, userClient.getMember(loan.getMemberId())));
     }
 
     @Caching(evict = {
