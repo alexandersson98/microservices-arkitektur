@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtil {
@@ -25,32 +26,32 @@ public class JwtUtil {
 
 
 
-    public String generateToken(String username, String role) {
+    public String generateToken(Long memberId, String role) {
         return Jwts.builder()
-                .subject(username)
-                .claim("role", role)        // rollen sparas i token
+                .claim("memberId", memberId)
+                .claim("roles", List.of(role))        // rollen sparas i token
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String extractUsername(String token){
+    public Long extractMemberId(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
-                .getSubject();
+                .get("memberId", Long.class);
     }
 
-    public String extractRole(String token) {
+    public List<String> extractRoles(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
-                .get("role", String.class);
+                .get("roles", List.class);
     }
 
 
