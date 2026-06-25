@@ -1,4 +1,4 @@
-# Microservices-arkitektur — Bibliotekssystem
+# Microservices-arkitektur - Bibliotekssystem
 
 Det här är vårt grupprojekt i kursen, där vi har byggt om ett tidigare Library API-projekt
 (en monolit) till en riktig microservices-arkitektur. Tanken var att lära oss hur man delar
@@ -20,6 +20,9 @@ kodgranskning genom hela projektet.
 - CI/CD
 - API-dokumentation
 - Kända begränsningar
+- Roller och åtkomst
+- Exempel: testa hela flödet
+- Vanliga problem
 
 ---
 
@@ -74,34 +77,41 @@ kodgranskning genom hela projektet.
 - **Redis** används för caching i Library-Service, t.ex. på listor över böcker och lån som
   läses ofta men ändras sällan.
 
+> **Notis om designval:** `Library-Service` är den enda tjänsten som har en **OpenFeign**-klient.
+> Det är medvetet, kommunikationen går bara i en riktning (`Library-Service` frågar
+> `User-Service` om medlemsinformation), inte tvärtom, så `User-Service` behöver ingen egen
+> **Feign**-klient. Vi har också medvetet valt olika databaser per tjänst (`H2 för User-Service,
+> PostgreSQL för Library-Service`) eftersom varje tjänst i en microservices-arkitektur ska
+> äga och välja sin egen datalagring oberoende av de andra.
+
 ---
 
 ## Tjänsterna
 
 | Tjänst | Port | Beskrivning | Databas |
 |---|---|---|---|
-| `eureka-server` | 8761 | Service registry — håller reda på var tjänsterna körs | — |
-| `api-gateway` | 8080 | Enda ingångspunkten för all trafik, routar och validerar JWT | — |
+| `eureka-server` | 8761 | Service registry - håller reda på var tjänsterna körs | - |
+| `api-gateway` | 8080 | Enda ingångspunkten för all trafik, routar och validerar JWT | - |
 | `user-service` | 8082 | Inloggning, registrering, medlemmar, roller | H2 (in-memory) |
 | `library-service` | 8081 | Böcker, författare, lån | PostgreSQL |
-| `frontend` | 5173 | Enkel SPA som pratar med backend via Gateway | — |
+| `frontend` | 5173 | Enkel SPA som pratar med backend via Gateway | - |
 
 ---
 
 ## Teknikstack
 
 - **Java 21** + **Spring Boot 3.5**
-- **Spring Cloud Gateway** — API Gateway
-- **Netflix Eureka** — Service Discovery
-- **Spring Security + JWT (JJWT)** — autentisering och rollbaserad åtkomstkontroll
-- **OpenFeign** — kommunikation mellan tjänsterna
-- **HashiCorp Vault** — hantering av hemligheter (t.ex. `jwt.secret`)
-- **PostgreSQL** / **H2** — databaser
-- **Redis** — caching
-- **TestContainers + MockMvc** — integrationstester
-- **JaCoCo** — testtäckning
-- **GitHub Actions** — CI/CD
-- **Docker / docker-compose** — infrastruktur (Vault, Postgres, Redis)
+- **Spring Cloud Gateway** - API Gateway
+- **Netflix Eureka** - Service Discovery
+- **Spring Security + JWT (JJWT)** - autentisering och rollbaserad åtkomstkontroll
+- **OpenFeign** - kommunikation mellan tjänsterna
+- **HashiCorp Vault** - hantering av hemligheter (t.ex. `jwt.secret`)
+- **PostgreSQL** / **H2** - databaser
+- **Redis** - caching
+- **TestContainers + MockMvc** - integrationstester
+- **JaCoCo** - testtäckning
+- **GitHub Actions** - CI/CD
+- **Docker / docker-compose** - infrastruktur (Vault, Postgres, Redis)
 
 ---
 
@@ -113,11 +123,11 @@ Innan du börjar, se till att du har installerat:
 
 - **Java 21** (JDK)
 - **Maven**
-- **Docker Desktop** (måste vara igång — krävs både för `docker-compose` och för
+- **Docker Desktop** (måste vara igång - krävs både för `docker-compose` och för
   TestContainers-testerna)
 - **Vault CLI** (för att hantera secrets manuellt i utvecklingsläge)
 
-### Steg 1 — Starta infrastrukturen (Vault, Postgres, Redis)
+### Steg 1 - Starta infrastrukturen (Vault, Postgres, Redis)
 
 Vi har valt att köra Vault manuellt i dev-mode istället för via docker-compose, eftersom
 det är enklare att jobba med lokalt. Postgres och Redis körs via docker-compose:
@@ -143,7 +153,7 @@ $env:VAULT_TOKEN="godis"
 vault kv put secret/boilerroom-labb1 jwt.secret="Xk0DbEEP0QjmKzdjqg9Dmr8yseS/oqz4OAkSg6AIMW5Z2xRimuEQsiV1fyf8vZXZumQCkzndn1qdfOd/aVzJ2A=="
 ```
 
-### Steg 2 — Starta Eureka Server
+### Steg 2 - Starta Eureka Server
 
 ```bash
 cd eureka-server
@@ -151,9 +161,9 @@ mvn spring-boot:run
 ```
 
 Vänta tills den startat, kontrollera sedan att den är igång genom att öppna
-`http://localhost:8761` i webbläsaren — du ska se Eurekas dashboard.
+`http://localhost:8761` i webbläsaren - du ska se Eurekas dashboard.
 
-### Steg 3 — Starta API Gateway
+### Steg 3 - Starta API Gateway
 
 I ett nytt terminalfönster:
 
@@ -162,7 +172,7 @@ cd api-gateway
 mvn spring-boot:run
 ```
 
-### Steg 4 — Starta de fristående tjänsterna
+### Steg 4 - Starta de fristående tjänsterna
 
 I egna terminalfönster:
 
@@ -179,7 +189,7 @@ mvn spring-boot:run
 Kontrollera i Eureka-dashboarden (`http://localhost:8761`) att båda tjänsterna dyker upp
 med status `UP`.
 
-### Steg 5 — Starta frontend (valfritt)
+### Steg 5 - Starta frontend (valfritt)
 
 ```bash
 cd frontend
@@ -257,8 +267,57 @@ Vi vill vara ärliga om några saker vi är medvetna om men inte hunnit/valt att
 
 - **JWT skapas i User-Service, inte i Gateway.** Gateway validerar tokens centralt för all
   trafik, men det är fortfarande User-Service som genererar token vid inloggning (Gateway
-  routar bara vidare login-requesten). Vi har stämt av detta med läraren.
+  routar bara vidare login-requesten). Vi har stämt av detta med läraren, som bekräftade
+att detta är ett korrekt designval som följer **Separation of Concerns** - auth-logiken
+hör ihop med användardatan snarare än med routinglagret.
 - **Vault körs i dev-mode** och är inte persistent. I en produktionsmiljö hade vi använt en
   riktig Vault-instans med persistent lagring.
-- **Library-Service saknar egna TestContainers-tester** — uppgiften krävde heltäckande
+- **Library-Service saknar egna TestContainers-tester** - uppgiften krävde heltäckande
   tester för minst en tjänst, och vi valde att lägga allt fokus där på User-Service.
+
+---
+
+## Roller och åtkomst
+
+| Roll | Kan göra |
+|---|---|
+| `USER` | Registrera sig, låna/återlämna böcker, och se sina egna lån |
+| `LIBRARIAN` | Allt `USER` kan + skapa/redigera böcker och författare + se alla lån |
+| `ADMIN` | Allt `LIBRARIAN` kan + skapa nya admins/librarians |
+
+---
+
+## Exempel: testa hela flödet
+
+```bash
+# 1. Registrera en ny medlem
+curl -X POST http://localhost:8080/api/v1/member \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","phone":"0701234567","personId":"199001011234",
+  "email":"test@test.com","password":"test1234"}'
+  
+# 2. Logga in och få en JWT token
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test@test.com","password":"test1234"}'
+  
+# 3. Använda token för en skyddad endpoint
+curl -X GET http://localhost:8080/api/v1/loans \
+  -H "Authorization: Bearer <TOKENEN_HÄR>"
+```
+
+---
+
+## Vanliga problem
+
+- **"Port already in use"** - en gammal process som kör på samma port.
+
+**Lösning:** `Hitta och stoppa porten eller starta om datorn.`
+
+- **"Could not find a valid Docker environment"** - Docker Desktop är inte igång.
+
+**Lösning:** `Starta Docker Desktop och vänta tills statusen är grön innan du kör tester.`
+
+- **Vault-fel vid uppstart** - Vault i dev-mode glömmer allt vid omstart.
+
+**Lösning:** `Man måste lägga in "jwt.secret" igen varje gång, som det står i Steg 1.`
